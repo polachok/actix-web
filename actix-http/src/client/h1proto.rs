@@ -68,11 +68,11 @@ where
 
     // create Framed and send request
     let mut framed_inner = Framed::new(io, h1::ClientCodec::default());
-    framed_inner.send((head, body.size()).into()).await?;
+    framed_inner.feed((head, body.size()).into()).await?;
 
     // send request body
     match body.size() {
-        BodySize::None | BodySize::Empty | BodySize::Sized(0) => (),
+        BodySize::None | BodySize::Empty | BodySize::Sized(0) => framed_inner.flush().await?,
         _ => send_body(body, Pin::new(&mut framed_inner)).await?,
     };
 
